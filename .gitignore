@@ -1,7 +1,7 @@
 # --- Ignore everything by default ---
 *
 
-# --- But keep these (whitelisted) patterns ---
+# --- But keep these (whitelisted) patterns everywhere ---
 !.gitignore
 !README.md
 !**/*.sh
@@ -14,7 +14,7 @@
 !**/*.config
 !**/*.md
 
-# --- Explicitly ignore heavy or temporary stuff anyway ---
+# --- Ignore big data and result files ---
 *.fastq
 *.fastq.gz
 *.fasta
