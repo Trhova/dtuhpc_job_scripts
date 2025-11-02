@@ -1,0 +1,38 @@
+# --- Ignore everything by default ---
+*
+
+# --- But keep these (whitelisted) patterns ---
+!.gitignore
+!README.md
+!**/*.sh
+!**/*.py
+!**/*.R
+!**/*.ipynb
+!**/*.yml
+!**/*.yaml
+!**/*.nf
+!**/*.config
+!**/*.md
+
+# --- Explicitly ignore heavy or temporary stuff anyway ---
+*.fastq
+*.fastq.gz
+*.fasta
+*.fq
+*.bam
+*.sam
+*.gz
+*.csv
+*.tsv
+*.h5
+*.rds
+*.RData
+*.zip
+*.tar
+*.tar.gz
+*.log
+work/
+results/
+data/
+Reference_genomes_and_databases/
+miniconda3/
