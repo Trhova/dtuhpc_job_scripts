@@ -1,44 +1,24 @@
 # --- Ignore everything by default ---
 *
 
-# --- Unignore folders you actually develop in ---
-!scripts/
-!workflows/
-!config/
-!envs/
-!notebooks/
-!*.md
+# --- Track your SLURM scripts folder ---
+!hpc_slurm/**
 !.gitignore
 !README.md
 
-# --- Track only your own scripts ---
-!**/*.sh
-!**/*.py
-!**/*.R
-!**/*.ipynb
-!**/*.yml
-!**/*.yaml
-!**/*.nf
-!**/*.config
-
-# --- Ignore system/env/tool files ---
-humann_project/humann*/**
-humann_project/humann38_transfer_bundle/**
-humann_project/humann_utility_mapping/**
-humann_project/metaphlan*/**
-humann_project/kneaddata*/**
-kneaddata_project/kneaddata*/**
-miniconda3/**
-Reference_genomes_and_databases/**
-results/**
-data/**
-*.fastq*
-*.fq
-*.bam
-*.sam
-*.gz
-*.tar*
-*.zip
-*.csv
-*.tsv
-*.log
+# --- Ignore large data and envs ---
+data/
+results/
+envs/
+miniconda3/
+Reference_genomes_and_databases/
+humann_project/
+kneaddata_project/
+**/*.fastq*
+**/*.fq
+**/*.bam
+**/*.sam
+**/*.gz
+**/*.tar*
+**/*.zip
+**/*.log
