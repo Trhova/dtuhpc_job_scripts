@@ -1,12 +1,12 @@
 # --- Ignore everything by default ---
 *
 
-# --- Track your SLURM scripts folder ---
+# --- Keep your HPC SLURM scripts ---
 !hpc_slurm/**
 !.gitignore
 !README.md
 
-# --- Ignore large data and envs ---
+# --- Ignore large or irrelevant content ---
 data/
 results/
 envs/
