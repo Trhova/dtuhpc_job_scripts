@@ -2,6 +2,7 @@
 *
 
 # --- Keep your HPC SLURM scripts ---
+!hpc_python/**
 !hpc_slurm/**
 !.gitignore
 !README.md
