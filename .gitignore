@@ -1,5 +1,6 @@
 # --- Ignore everything by default ---
 *
+!hpc_python/**
 
 # --- Keep your HPC SLURM scripts ---
 !hpc_python/**
