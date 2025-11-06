@@ -55,3 +55,57 @@ python hpc_python/unpack_merge_fastq.py
 - Before large submits, run a single-sample dry run by editing `#BSUB -J` and the sample list inside the script so you can verify output paths.
 - Keep `samples.txt` in your project directories sorted and in sync with available FASTQ files; the array jobs rely on the line number to match `LSB_JOBINDEX`.
 - When tool environments change (e.g., new KneadData version), update both the Conda environment name in the script and the downstream paths so the logs remain organized.
+
+## HPC Tips & Tricks
+
+### Logging In
+
+Use SSH to reach the DTU HPC login node for light tasks (editing files, Git, staging jobs, data transfer):
+
+```bash
+ssh xxx@login1.hpc.dtu.dk
+```
+
+### Interactive Compute Session
+
+Launch an interactive shell on a compute node so heavier work stays off the login node:
+
+```bash
+linuxsh
+conda activate pytools
+python /work3/xxx/hpc_python/unpack_merge_fastq.py
+```
+
+- Starts immediately without waiting in queue.
+- Gives live feedback while you experiment or debug.
+- Leave the session with `exit` once finished.
+
+### Transfer Data To/From HPC
+
+Use the DTU transfer node for large copy jobs. The example below mirrors a HUMAnN results folder to a mounted drive on your workstation:
+
+```bash
+scp -r xxx@transfer.gbar.dtu.dk:/work3/xxx/humann_project/SA_24_09_Humann_Run /mnt/g/SA_24_09_Metagenome_Alex
+```
+
+Swap in your own project path and local destination as needed.
+
+### Check Storage Usage
+
+Run the DTU helper script to see current and remaining quota on `/work3`:
+
+```bash
+getquota_work3.sh
+```
+
+### Monitor Jobs
+
+Helpful LSF commands for tracking utilization and job states:
+
+```bash
+bstat -C    # Cluster-wide utilization
+bstat -M    # Queue utilization (memory view)
+bjobs       # Your active and pending jobs
+```
+
+Enjoy the cleaner front page!
