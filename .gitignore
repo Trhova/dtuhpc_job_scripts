@@ -1,12 +1,17 @@
 # --- Ignore everything by default ---
 *
+
+# --- Keep repository metadata ---
+!.gitignore
+!README.md
+
+# --- Keep your HPC Python scripts ---
+!hpc_python/
 !hpc_python/**
 
 # --- Keep your HPC SLURM scripts ---
-!hpc_python/**
+!hpc_slurm/
 !hpc_slurm/**
-!.gitignore
-!README.md
 
 # --- Ignore large or irrelevant content ---
 data/
@@ -24,4 +29,3 @@ kneaddata_project/
 **/*.tar*
 **/*.zip
 **/*.log
-!hpc_python/**
