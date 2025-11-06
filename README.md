@@ -107,5 +107,3 @@ bstat -C    # Cluster-wide utilization
 bstat -M    # Queue utilization (memory view)
 bjobs       # Your active and pending jobs
 ```
-
-Enjoy the cleaner front page!
