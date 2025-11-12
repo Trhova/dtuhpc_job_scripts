@@ -42,6 +42,8 @@ Use the helpers in `hpc_python/` from an interactive login node or within the ba
 - `kneaddata_read_summary.py` – Collates KneadData reports across samples into a concise table.
 - `merge_pairs_for_humann.py` – Prepares merged FASTQ pairs for HUMAnN runs.
 - `read_quality_hist.py` – Generates quality score histograms from FASTQ files.
+- `humann_postprocess.py` – After HUMAnN finishes, renormalizes the per-sample tables (CPM + relative abundance) and regroups CPM gene families to level-4 EC categories. Run inside `linuxsh`, activate the HUMAnN env, and execute `python hpc_python/humann_postprocess.py`.
+- `humann_merge_tables.py` – Gathers each sample’s normalized outputs and MetaPhlAn profiles into staging folders and runs `humann_join_tables`/`merge_metaphlan_tables.py` to produce cohort-wide matrices under `humann_run/merged_tables/`.
 
 Activate `pytools` (or whichever environment has the required dependencies) before invoking them:
 
