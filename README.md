@@ -8,6 +8,7 @@ Utility scripts and job submissions I use on the DTU HPC cluster for processing 
 | --- | --- |
 | `hpc_slurm/` | LSF (`#BSUB`) submission scripts that wrap tools like KneadData and HUMAnN with the paths used in my project space. |
 | `hpc_python/` | Companion Python utilities for unpacking FASTQ archives, merging lanes, plotting QC summaries, and reporting KneadData results. |
+| `thesis_templates/` | General DTU thesis submission templates in Markdown and Word formats. |
 
 Everything else in the workspace (`envs/`, `humann_project/`, `kneaddata_project/`, etc.) contains run-specific data and lives outside of Git tracking.
 

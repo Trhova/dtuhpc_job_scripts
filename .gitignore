@@ -13,6 +13,10 @@
 !hpc_slurm/
 !hpc_slurm/**
 
+# --- Keep reusable thesis templates ---
+!thesis_templates/
+!thesis_templates/**
+
 # --- Ignore large or irrelevant content ---
 data/
 results/
