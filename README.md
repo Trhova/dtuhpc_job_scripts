@@ -1,112 +1,112 @@
-# DTU HPC Job Scripts
+# DTU HPC Guide and Job Scripts
 
-Utility scripts and job submissions I use on the DTU HPC cluster for processing metagenomics sequencing data. The repository is split between batch scripts that run on the cluster and Python helpers that prepare or summarize the data.
+This repository is a practical guide for working on the DTU HPC/DCC LSF cluster, plus reusable job scripts and Python helpers for metagenomics workflows. It is meant to be safe to share: examples use placeholders such as `<dtu-user>`, `<project>`, and `<path-to-private-key>`.
 
-## Repository Layout
+## Start Here
+
+| Need | Where to go |
+| --- | --- |
+| Connect from home or campus | [DTU HPC access guide](docs/dtu_hpc_guide.md#1-connect-to-dtu-hpc) |
+| Set up VS Code SSH access and port forwarding | [VS Code and SSH tunnels](docs/dtu_hpc_guide.md#4-vs-code-remote-ssh-and-port-forwarding) |
+| Submit and monitor LSF jobs | [Batch jobs with LSF](docs/dtu_hpc_guide.md#6-submit-and-monitor-lsf-jobs) |
+| Adapt the included metagenomics scripts | [Repository scripts](#repository-scripts) |
+| Check storage, modules, and etiquette | [Working on the cluster](docs/dtu_hpc_guide.md#5-working-on-the-cluster) |
+
+## Quick Connection Pattern
+
+1. Connect to the DTU network. From outside DTU, use DTU VPN/Cisco Secure Client if your account requires it.
+2. SSH to a login node:
+
+   ```bash
+   ssh <dtu-user>@login1.hpc.dtu.dk
+   ```
+
+   P1 users may have a project-specific login node such as `login9.hpc.dtu.dk`; use the host given by your DTU/P1 onboarding material.
+
+3. Keep login-node work light: edit files, use Git, stage data, and submit jobs.
+4. Run compute-heavy work through LSF batch jobs or `linuxsh`, not directly on the login node.
+
+## Repository Scripts
 
 | Path | Description |
 | --- | --- |
-| `hpc_slurm/` | LSF (`#BSUB`) submission scripts that wrap tools like KneadData and HUMAnN with the paths used in my project space. |
-| `hpc_python/` | Companion Python utilities for unpacking FASTQ archives, merging lanes, plotting QC summaries, and reporting KneadData results. |
+| `hpc_slurm/` | LSF (`#BSUB`) submission scripts for KneadData, HUMAnN, and FASTQ preparation. Despite the folder name, these are LSF scripts, not Slurm scripts. |
+| `hpc_python/` | Python utilities for unpacking FASTQ archives, merging lanes, plotting QC summaries, and reporting KneadData/HUMAnN results. |
 | `thesis_templates/` | General DTU thesis submission templates in Markdown and Word formats. |
+| `docs/` | Outward-facing DTU HPC notes, including SSH, VPN, VS Code, storage, modules, and LSF examples. |
 
-Everything else in the workspace (`envs/`, `humann_project/`, `kneaddata_project/`, etc.) contains run-specific data and lives outside of Git tracking.
+Everything else in a working HPC project area (`envs/`, `humann_project/`, `kneaddata_project/`, sequencing data, logs, etc.) should stay out of Git.
 
-## Getting Started
+## Adapting the Scripts
 
-1. Clone the repository onto DTU HPC (e.g., `/work3/xxx`).
-2. Update the hard-coded project paths inside the scripts so they match your own workspace layout.
-3. Make sure the referenced Conda environments exist. The submission scripts expect environments such as `kneaddata-0.12.3` and `pytools` to be available under `/work3/xxx/miniconda3`.
+1. Clone the repository onto DTU HPC, for example under `/work3/<dtu-user>/<project>/`.
+2. Replace project-specific paths in `hpc_slurm/` with your own `/work1/<dtu-user>` or `/work3/<dtu-user>` paths.
+3. Make sure the referenced Conda environments exist. Several scripts expect environments such as `kneaddata-0.12.3` and `pytools`.
+4. Run a small single-sample test before submitting large arrays.
 
-## Submitting Jobs
-
-The scripts in `hpc_slurm/` target the LSF scheduler on DTU HPC.
+Example submit:
 
 ```bash
-# Example: submit KneadData array job
 bsub < hpc_slurm/kneaddata_metagenomics_80.sh
 ```
 
-Each script includes:
+Each submission script contains:
 
-- Job metadata (`#BSUB` directives) you can tune for core counts, memory, wall-clock limits, and queue.
-- Environment bootstrapping that adds Conda to the `PATH`, sources `conda.sh`, and activates the right environment.
-- Tool-specific sections that set input/output folders within `/work3/xxx` and then launch the workload.
-
-Logs and outputs are written under the project directories referenced in the script (`/work3/xxx/kneaddata_project/...` by default).
+- `#BSUB` directives for queue, job name, cores, memory, wall time, logs, and arrays.
+- Conda activation and environment setup.
+- Input/output paths that should be reviewed before running.
+- Tool-specific commands for KneadData, HUMAnN, or FASTQ preparation.
 
 ## Python Utilities
 
-Use the helpers in `hpc_python/` from an interactive login node or within the batch scripts.
-
-- `unpack_merge_fastq.py` – Extracts tarred sequencing drops, merges lanes into paired FASTQ files, and prints a verification summary.
-- `kneaddata_read_summary.py` – Collates KneadData reports across samples into a concise table.
-- `merge_pairs_for_humann.py` – Prepares merged FASTQ pairs for HUMAnN runs.
-- `read_quality_hist.py` – Generates quality score histograms from FASTQ files.
-- `humann_postprocess.py` – After HUMAnN finishes, renormalizes the per-sample tables (CPM + relative abundance) and regroups CPM gene families to level-4 EC categories. Run inside `linuxsh`, activate the HUMAnN env, and execute `python hpc_python/humann_postprocess.py`.
-- `humann_merge_tables.py` – Gathers each sample’s normalized outputs and MetaPhlAn profiles into staging folders and runs `humann_join_tables`/`merge_metaphlan_tables.py` to produce cohort-wide matrices under `humann_run/merged_tables/`.
-
-Activate `pytools` (or whichever environment has the required dependencies) before invoking them:
+Activate the relevant environment before running a helper:
 
 ```bash
 conda activate pytools
 python hpc_python/unpack_merge_fastq.py
 ```
 
-## Tips
+Available helpers:
 
-- Before large submits, run a single-sample dry run by editing `#BSUB -J` and the sample list inside the script so you can verify output paths.
-- Keep `samples.txt` in your project directories sorted and in sync with available FASTQ files; the array jobs rely on the line number to match `LSB_JOBINDEX`.
-- When tool environments change (e.g., new KneadData version), update both the Conda environment name in the script and the downstream paths so the logs remain organized.
+- `unpack_merge_fastq.py` extracts tarred sequencing drops, merges lanes into paired FASTQ files, and prints a verification summary.
+- `kneaddata_read_summary.py` collates KneadData reports across samples into a concise table.
+- `merge_pairs_for_humann.py` prepares merged FASTQ pairs for HUMAnN runs.
+- `read_quality_hist.py` generates quality score histograms from FASTQ files.
+- `humann_postprocess.py` renormalizes per-sample HUMAnN tables and regroups CPM gene families to level-4 EC categories.
+- `humann_merge_tables.py` gathers normalized outputs and MetaPhlAn profiles, then builds cohort-wide matrices under `humann_run/merged_tables/`.
 
-## HPC Tips & Tricks
-
-### Logging In
-
-Use SSH to reach the DTU HPC login node for light tasks (editing files, Git, staging jobs, data transfer):
-
-```bash
-ssh xxx@login1.hpc.dtu.dk
-```
-
-### Interactive Compute Session
-
-Launch an interactive shell on a compute node so heavier work stays off the login node:
+## Useful Commands
 
 ```bash
+# Enter an interactive application node for light testing
 linuxsh
-conda activate pytools
-python /work3/xxx/hpc_python/unpack_merge_fastq.py
-```
 
-- Starts immediately without waiting in queue.
-- Gives live feedback while you experiment or debug.
-- Leave the session with `exit` once finished.
+# Submit a job
+bsub < path/to/job.sh
 
-### Transfer Data To/From HPC
+# Compact job status
+bstat
+bstat -C
+bstat -M
 
-Use the DTU transfer node for large copy jobs. The example below mirrors a HUMAnN results folder to a mounted drive on your workstation:
+# Native LSF job list
+bjobs
 
-```bash
-scp -r xxx@transfer.gbar.dtu.dk:/work3/xxx/humann_project/SA_24_09_Humann_Run /mnt/g/SA_24_09_Metagenome_Alex
-```
+# Remove a queued or running job
+bkill <job-id>
 
-Swap in your own project path and local destination as needed.
-
-### Check Storage Usage
-
-Run the DTU helper script to see current and remaining quota on `/work3`:
-
-```bash
+# Check scratch quota on work3
 getquota_work3.sh
 ```
 
-### Monitor Jobs
+## Sources
 
-Helpful LSF commands for tracking utilization and job states:
+This guide links back to DTU/DCC documentation and the P1 DTU HPC guide where relevant. Start with:
 
-```bash
-bstat -C    # Cluster-wide utilization
-bstat -M    # Queue utilization (memory view)
-bjobs       # Your active and pending jobs
-```
+- DTU/DCC access guide: <https://www.hpc.dtu.dk/?page_id=2501>
+- DTU/DCC LSF batch jobs: <https://www.hpc.dtu.dk/?page_id=1416>
+- DTU/DCC job monitoring: <https://www.hpc.dtu.dk/?page_id=1519>
+- DTU/DCC storage: <https://www.hpc.dtu.dk/?page_id=59>
+- DTU/DCC modules: <https://www.hpc.dtu.dk/?page_id=282>
+- DTU network and VPN: <https://www.inside.dtu.dk/en/it-information-technology/it-access-and-network/netvaerk-og-vpn>
+- P1 DTU HPC guide: <https://hpc.aicentre.dk/clusters/dtu-hpc/>

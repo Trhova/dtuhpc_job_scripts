@@ -5,6 +5,10 @@
 !.gitignore
 !README.md
 
+# --- Keep outward-facing guide docs ---
+!docs/
+!docs/**
+
 # --- Keep your HPC Python scripts ---
 !hpc_python/
 !hpc_python/**
