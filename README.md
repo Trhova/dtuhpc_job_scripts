@@ -1,134 +1,157 @@
 # DTU HPC Metagenomics Workflow Guide
 
-This repository is a beginner-friendly guide and script collection for running metagenomics work on DTU HPC. It is not only a place to store job scripts: it is meant to explain the daily workflow from laptop to DTU HPC, from editing code to submitting LSF jobs, and from raw sequencing files to KneadData/HUMAnN outputs.
+> A practical, beginner-friendly guide for working on DTU HPC with SSH, VS Code Remote-SSH, LSF/`bsub`, and metagenomics job scripts for KneadData, MetaPhlAn, and HUMAnN.
 
-The included scripts are useful templates, but they are still project-specific in places. Before running anything, read [Using This Repo for Metagenomics](docs/06_using_this_repo_for_metagenomics.md) and replace every project path, sample count, database path, and Conda environment with your own values.
+This repository is meant to be a guide, not just a script dump. It explains the daily workflow from laptop to DTU HPC, from editing code to submitting jobs, and from raw sequencing files to processed metagenomics outputs.
+
+> [!IMPORTANT]
+> The included scripts are templates from real project work. Some shell and Python scripts still contain project-specific paths. Before running anything, replace project paths, sample counts, database paths, log paths, and Conda environments with your own values.
+
+## Contents
+
+- [Who This Repo Is For](#who-this-repo-is-for)
+- [What DTU HPC Gives You](#what-dtu-hpc-gives-you)
+- [Start Here](#start-here)
+- [Repository Layout](#repository-layout)
+- [Quickstart: Laptop to First Job](#quickstart-laptop-to-first-job)
+- [How the Metagenomics Scripts Fit Together](#how-the-metagenomics-scripts-fit-together)
+- [Safety Rules](#safety-rules)
+- [Useful Commands](#useful-commands)
+- [Official DTU References](#official-dtu-references)
 
 ## Who This Repo Is For
 
-This repo is for DTU students, employees, and collaborators with DTU HPC access who need a practical starting point for:
+This repo is for DTU students, employees, and collaborators with DTU HPC access who need to:
 
-- connecting to DTU HPC from a laptop
-- setting up SSH keys and VS Code Remote-SSH
-- understanding login nodes, transfer nodes, interactive nodes, and LSF jobs
-- adapting metagenomics scripts for KneadData, MetaPhlAn, and HUMAnN
-- keeping data, logs, code, and results in sensible places
+| Need | Where to go |
+| --- | --- |
+| Understand what HPC is | [01 - HPC Mental Model](docs/01_hpc_mental_model.md) |
+| Connect from a laptop | [02 - SSH and VS Code Remote-SSH](docs/02_ssh_and_vscode_remote.md) |
+| Do a safe first session | [03 - First HPC Session](docs/03_first_hpc_session.md) |
+| Submit and debug jobs | [04 - LSF Jobs and `bsub`](docs/04_lsf_jobs_and_bsub.md) |
+| Move raw data/results | [05 - Transferring Data](docs/05_transferring_data.md) |
+| Adapt this repo's scripts | [06 - Using This Repo for Metagenomics](docs/06_using_this_repo_for_metagenomics.md) |
 
-If your department or group has a special cluster, queue, storage area, or access route, use that local guidance together with this repo. When in doubt, check the official DTU HPC documentation.
+If your department or group has a special queue, storage area, cluster, or login route, use that local guidance together with this repo. When in doubt, check the official DTU HPC documentation.
 
-## What You Will Learn
+## What DTU HPC Gives You
 
-After reading the guide, you should understand:
+DTU/DCC documents the LSF 10 cluster as open to DTU students and employees. If you are a DTU student or employee with valid DTU credentials, the DTU/DCC FAQ says you are already allowed to use the HPC cluster. Visitors need a DTU guest account with the relevant service enabled.
 
-1. what DTU HPC is and why it uses a scheduler
-2. how to connect from your laptop with SSH
-3. how SSH keys, public keys, private keys, and `~/.ssh/config` fit together
-4. how to use VS Code Remote-SSH without overloading login nodes
-5. where to put code, raw data, databases, logs, and results
-6. when to use `linuxsh` for light interactive work
-7. when and how to submit real jobs with `bsub`
-8. how to monitor, inspect, cancel, and debug jobs
-9. how to move data with the transfer node
-10. how the included metagenomics scripts fit into a raw-data-to-results workflow
+| Topic | Practical meaning |
+| --- | --- |
+| Access | DTU students/employees use DTU credentials. Access is case-sensitive. |
+| Scheduler | DTU HPC uses LSF. You submit jobs with `bsub` and configure them with `#BSUB` lines. |
+| Home storage | Each HPC user has a 30 GB backed-up home directory by default. Use it for code, config, and small important files. |
+| Scratch storage | Scratch is temporary working storage for computation, commonly under `/work3/<dtu-user>`. It is not backed up. |
+| Transfer node | Large transfers should use `transfer.gbar.dtu.dk` or the transfer host documented for your account, not login nodes. |
+| General cluster | The Central DTU HPC Cluster is documented as a general compute resource for DTU staff and students. |
+| Hardware examples | DTU/DCC lists mixed CPU nodes including Intel Xeon Gold, Intel Xeon Platinum, AMD EPYC, Infiniband-connected nodes, and memory configurations from 128 GB up to 1-1.5 TB per node. |
+
+> [!NOTE]
+> Hardware, queues, access rules, and hostnames can change. Treat the stats above as orientation and check the official DTU HPC pages for current details before requesting special hardware or planning a large run.
+
+### Scratch Space
+
+Scratch space is working space for computation: raw FASTQs, temporary files, databases, Conda environments, logs, and output folders. It is useful because metagenomics workflows can generate far more data than the 30 GB home quota can hold.
+
+Scratch is not a backup. If you delete files there, they may not be recoverable. Move important final results to an approved backed-up location.
+
+DTU/DCC's disk quota FAQ currently says to request scratch space by writing to:
+
+```text
+support@cc.dtu.dk
+```
+
+Include a short explanation of why you need it. Example:
+
+```text
+Subject: Request for /work3 scratch space for DTU HPC metagenomics project
+
+Hello DTU HPC support,
+
+I would like to request scratch space on /work3 for a metagenomics project.
+
+DTU username: <dtu-user>
+Project/group: <project-or-group>
+Approximate storage needed: <size estimate>
+Reason: I need working space for raw FASTQ files, reference databases,
+KneadData/HUMAnN intermediate files, logs, and output tables.
+
+Best regards,
+<name>
+```
+
+After scratch space is created, read the `readme.txt` in the relevant scratch directory before using it.
 
 ## Start Here
 
-```text
-Laptop
-  |
-  | 1. Read the mental model
-  v
-docs/01_hpc_mental_model.md
-  |
-  | 2. Set up SSH and VS Code
-  v
-docs/02_ssh_and_vscode_remote.md
-  |
-  | 3. Do a first safe HPC session
-  v
-docs/03_first_hpc_session.md
-  |
-  | 4. Learn LSF job scripts
-  v
-docs/04_lsf_jobs_and_bsub.md
-  |
-  | 5. Learn data transfer
-  v
-docs/05_transferring_data.md
-  |
-  | 6. Adapt this repo's metagenomics scripts
-  v
-docs/06_using_this_repo_for_metagenomics.md
+```mermaid
+flowchart TD
+    A[Laptop] --> B[Read HPC mental model]
+    B --> C[Set up SSH key and config]
+    C --> D[Connect with VS Code Remote-SSH]
+    D --> E[Create /work3 project folder]
+    E --> F[Clone this repo]
+    F --> G[Submit tiny test bsub job]
+    G --> H[Personalize metagenomics scripts]
+    H --> I[Run one-sample test]
+    I --> J[Scale to full LSF array]
 ```
 
-For the shortest path, read these in order:
+Read these in order:
 
-1. [HPC Mental Model](docs/01_hpc_mental_model.md)
-2. [SSH and VS Code Remote-SSH](docs/02_ssh_and_vscode_remote.md)
-3. [First HPC Session](docs/03_first_hpc_session.md)
-4. [LSF Jobs and `bsub`](docs/04_lsf_jobs_and_bsub.md)
-5. [Transferring Data](docs/05_transferring_data.md)
-6. [Using This Repo for Metagenomics](docs/06_using_this_repo_for_metagenomics.md)
+1. [01 - HPC Mental Model](docs/01_hpc_mental_model.md)
+2. [02 - SSH and VS Code Remote-SSH](docs/02_ssh_and_vscode_remote.md)
+3. [03 - First HPC Session](docs/03_first_hpc_session.md)
+4. [04 - LSF Jobs and `bsub`](docs/04_lsf_jobs_and_bsub.md)
+5. [05 - Transferring Data](docs/05_transferring_data.md)
+6. [06 - Using This Repo for Metagenomics](docs/06_using_this_repo_for_metagenomics.md)
 
 ## Repository Layout
 
-| Path | What it is for |
+| Path | Purpose |
 | --- | --- |
-| `README.md` | This overview and entry point. |
+| `README.md` | Overview, orientation, and command cookbook. |
 | `docs/01_hpc_mental_model.md` | Plain-language explanation of DTU HPC concepts. |
 | `docs/02_ssh_and_vscode_remote.md` | SSH keys, SSH config, VS Code Remote-SSH, and troubleshooting. |
 | `docs/03_first_hpc_session.md` | Step-by-step tutorial from SSH login to a tiny `bsub` job. |
 | `docs/04_lsf_jobs_and_bsub.md` | Detailed explanation of `#BSUB` scripts, arrays, resources, logs, and debugging. |
 | `docs/05_transferring_data.md` | `scp`, `rsync`, transfer node usage, data placement, and Git safety. |
-| `docs/06_using_this_repo_for_metagenomics.md` | How the included KneadData/HUMAnN/Python scripts fit together. |
+| `docs/06_using_this_repo_for_metagenomics.md` | How the KneadData/HUMAnN/Python scripts fit together. |
 | `hpc_lsf/` | LSF (`#BSUB`) job script templates. See [hpc_lsf/README.md](hpc_lsf/README.md). |
 | `hpc_python/` | Python helper scripts. See [hpc_python/README.md](hpc_python/README.md). |
-| `envs/` | Tracked Conda environment exports, if present. See [envs/README.md](envs/README.md). |
+| `envs/` | Conda environment notes/exports. See [envs/README.md](envs/README.md). |
 | `thesis_templates/` | Optional thesis templates. Not required for HPC workflows. |
-
-## Beginner Mental Model of DTU HPC
-
-An HPC cluster is a shared collection of servers. You do not run heavy analyses directly where you log in. The usual pattern is:
-
-1. Your laptop connects to a login node with SSH.
-2. You edit files, check paths, and submit work from the login node.
-3. LSF, the scheduler, decides when and where your job runs.
-4. The job runs later on a compute node.
-5. Logs and outputs are written to shared storage.
-6. Large input and output transfers go through a transfer node.
-
-Think of the login node as a front desk, not a laboratory bench. It is for coordination. Real analysis belongs in LSF jobs.
-
-DTU/DCC documentation states that DTU HPC uses LSF, provides a general central cluster for DTU staff and students, gives each user a 30 GB backed-up home directory, and offers scratch storage such as `/work3` on request. Scratch is for active computation and is not a backup. Check official DTU HPC documentation for current hardware, hostnames, quotas, and request procedures.
 
 ## Quickstart: Laptop to First Job
 
-This quickstart assumes you already have DTU HPC access. If you do not, start with DTU HPC documentation or your department's onboarding.
+This is the condensed path. The detailed version is in [03 - First HPC Session](docs/03_first_hpc_session.md).
 
-1. Connect to the DTU network or VPN if required.
-2. Test password login:
+1. Connect to DTU network/VPN if required.
+2. Test SSH:
 
    ```bash
    ssh <dtu-user>@login1.hpc.dtu.dk
    ```
 
-3. Generate an SSH key locally and add an SSH config alias using [SSH and VS Code Remote-SSH](docs/02_ssh_and_vscode_remote.md).
-4. Connect from VS Code using `Remote-SSH: Connect to Host...`.
-5. Open or create a project folder on scratch/project storage:
-
-   ```text
-   /work3/<dtu-user>/<project>
-   ```
-
-6. Clone this repo on HPC:
+3. Set up an SSH key and `~/.ssh/config` using [02 - SSH and VS Code Remote-SSH](docs/02_ssh_and_vscode_remote.md).
+4. Connect with VS Code Remote-SSH.
+5. Create a project folder on scratch/project storage:
 
    ```bash
+   mkdir -p /work3/<dtu-user>/<project>
    cd /work3/<dtu-user>/<project>
+   ```
+
+6. Clone this repo:
+
+   ```bash
    git clone <repo-url> dtuhpc_job_scripts
    cd dtuhpc_job_scripts
    ```
 
-7. Submit a tiny test job, not a metagenomics production job yet:
+7. Submit a tiny test job:
 
    ```bash
    mkdir -p logs
@@ -152,22 +175,18 @@ This quickstart assumes you already have DTU HPC access. If you do not, start wi
    bjobs
    ```
 
-8. Inspect the logs when the job finishes:
+8. Inspect output:
 
    ```bash
    ls logs
    cat logs/hello_*.out
    ```
 
-For a slower step-by-step version, follow [First HPC Session](docs/03_first_hpc_session.md).
-
-## How This Repo's Scripts Fit Into the Workflow
-
-The metagenomics path is:
+## How the Metagenomics Scripts Fit Together
 
 | Stage | Purpose | Main files |
 | --- | --- | --- |
-| Raw data staging | Put raw FASTQs or sequencing archives on scratch/project storage. | `docs/05_transferring_data.md` |
+| Raw data staging | Put raw FASTQs or sequencing archives on scratch/project storage. | [Transferring Data](docs/05_transferring_data.md) |
 | Unpack/merge FASTQs | Convert delivered archives/lanes into paired FASTQs. | `hpc_lsf/unpack_merge_fastq.sh`, `hpc_python/unpack_merge_fastq.py` |
 | KneadData | Remove host/contaminant reads and produce cleaned sample outputs. | `hpc_lsf/kneaddata_*.sh` |
 | HUMAnN input prep | Merge KneadData paired reads into files expected by HUMAnN scripts. | `hpc_python/merge_pairs_for_humann.py` |
@@ -175,33 +194,168 @@ The metagenomics path is:
 | Postprocess | Normalize, regroup, and merge tables. | `hpc_python/humann_postprocess.py`, `hpc_python/humann_merge_tables.py` |
 | Summaries | Summarize read counts and QC outputs. | `hpc_python/kneaddata_read_summary.py`, `hpc_python/read_quality_hist.py` |
 
-The current scripts are templates extracted from a real project. They contain assumptions about paths, sample names, database locations, Conda environments, and array sizes. Do not submit them unchanged.
+> [!WARNING]
+> Do not submit the included LSF scripts unchanged. They are templates. Replace personal paths, sample counts, log paths, database paths, and Conda environments first.
 
-## Safety Warnings
+## Safety Rules
 
-- **Login nodes:** Do not run KneadData, HUMAnN, large Python processing, Jupyter notebooks, or large file indexing directly on login nodes.
-- **Data size:** Raw FASTQs, databases, `.tar.gz` deliveries, BAM/SAM files, and result folders can be huge. Keep them out of Git.
-- **Quotas:** Home storage is limited. A full home directory can break VS Code server installs, shell startup, Conda caches, and small writes. Check quota before large work.
-- **Scratch:** Scratch/project storage is for active work and is usually not backed up. Copy important final results to an approved backed-up location.
-- **Secrets:** Never commit SSH private keys, passwords, tokens, or credentials. Only public keys (`*.pub`) are intended to be copied to a server.
-- **Historical paths:** If you see a personal path in a script, replace it with `/work3/<dtu-user>/<project>/...` or your approved project path before use.
+| Rule | Why it matters |
+| --- | --- |
+| Do not run heavy analysis on login nodes. | Login nodes are shared and intended for coordination, editing, Git, and job submission. |
+| Keep raw data out of Git. | FASTQs, archives, BAM/SAM files, databases, logs, and outputs can be huge or sensitive. |
+| Use `/work3` or approved project storage for active data. | Home is 30 GB and intended for code/config/small files. |
+| Check quota before large runs. | Full home/work storage can break VS Code, Conda, and jobs. |
+| Use the transfer node for large transfers. | It avoids loading login nodes and is documented for large data movement. |
+| Never commit secrets. | Private keys, passwords, tokens, and credentials must stay out of the repo. |
 
-## Detailed Docs
+## Useful Commands
 
-- [01 - HPC Mental Model](docs/01_hpc_mental_model.md)
-- [02 - SSH and VS Code Remote-SSH](docs/02_ssh_and_vscode_remote.md)
-- [03 - First HPC Session](docs/03_first_hpc_session.md)
-- [04 - LSF Jobs and `bsub`](docs/04_lsf_jobs_and_bsub.md)
-- [05 - Transferring Data](docs/05_transferring_data.md)
-- [06 - Using This Repo for Metagenomics](docs/06_using_this_repo_for_metagenomics.md)
-- [LSF script catalog](hpc_lsf/README.md)
-- [Python helper catalog](hpc_python/README.md)
-- [Conda environment notes](envs/README.md)
+These are intentionally copy-pasteable. Replace placeholders before running.
+
+### Connect to DTU HPC
+
+```bash
+ssh <dtu-user>@login1.hpc.dtu.dk
+```
+
+### Generate a Local SSH Key
+
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+ssh-keygen -t ed25519 -f ~/.ssh/dtu_hpc_ed25519 -C "<dtu-user>@dtu-hpc"
+```
+
+### Install Public Key If `ssh-copy-id` Works
+
+```bash
+ssh-copy-id -i ~/.ssh/dtu_hpc_ed25519.pub <dtu-user>@login1.hpc.dtu.dk
+```
+
+### SSH Config Template
+
+```sshconfig
+Host dtu-hpc-login
+    HostName login1.hpc.dtu.dk
+    User <dtu-user>
+    IdentityFile ~/.ssh/dtu_hpc_ed25519
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+    ServerAliveCountMax 5
+
+Host dtu-hpc-transfer
+    HostName transfer.gbar.dtu.dk
+    User <dtu-user>
+    IdentityFile ~/.ssh/dtu_hpc_ed25519
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+    ServerAliveCountMax 5
+```
+
+### Create and Enter Project Folder
+
+```bash
+mkdir -p /work3/<dtu-user>/<project>
+cd /work3/<dtu-user>/<project>
+```
+
+### Clone This Repo on HPC
+
+```bash
+git clone <repo-url> dtuhpc_job_scripts
+cd dtuhpc_job_scripts
+```
+
+### Start a Light Interactive Session
+
+```bash
+linuxsh
+hostname
+pwd
+exit
+```
+
+### Submit a Job
+
+```bash
+mkdir -p logs
+bsub < hpc_lsf/<script>.sh
+```
+
+### Monitor Jobs
+
+```bash
+bjobs
+bjobs -l <job-id>
+bstat
+bpeek <job-id>
+bhist -l <job-id>
+```
+
+### Cancel a Job
+
+```bash
+bkill <job-id>
+```
+
+### Check Home Quota
+
+```bash
+getquota_zhome.sh
+cd ~ && du -h --max-depth=1 .
+```
+
+### Check Scratch Quota and Project Size
+
+```bash
+getquota_work3.sh
+du -sh /work3/<dtu-user>/<project>
+```
+
+### Transfer Data to HPC With `rsync`
+
+```bash
+rsync -avP local_fastq_folder/ dtu-hpc-transfer:/work3/<dtu-user>/<project>/input_fastq/
+```
+
+### Transfer Results Back
+
+```bash
+rsync -avP dtu-hpc-transfer:/work3/<dtu-user>/<project>/results/ ./results/
+```
+
+### Dry Run a Large Transfer
+
+```bash
+rsync -avP --dry-run local_fastq_folder/ dtu-hpc-transfer:/work3/<dtu-user>/<project>/input_fastq/
+```
+
+### Count Samples and Set Array Size
+
+```bash
+wc -l /work3/<dtu-user>/<project>/kneaddata_project/samples.txt
+```
+
+### Find Project-Specific Paths Before Running Scripts
+
+```bash
+grep -R "/work3/" hpc_lsf hpc_python
+grep -R "<old-user-or-project-name>" hpc_lsf hpc_python
+```
+
+### Activate Conda in a Batch Script
+
+```bash
+source /work3/<dtu-user>/<project>/miniconda3/etc/profile.d/conda.sh
+conda activate <env-name>
+which python
+```
 
 ## Official DTU References
 
 Check official DTU HPC documentation for current details:
 
+- DTU/DCC access FAQ: <https://www.hpc.dtu.dk/?page_id=862>
 - DTU/DCC access guide: <https://www.hpc.dtu.dk/?page_id=2501>
 - DTU/DCC LSF jobs: <https://www.hpc.dtu.dk/?page_id=1416>
 - DTU/DCC job monitoring: <https://www.hpc.dtu.dk/?page_id=1519>
