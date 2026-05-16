@@ -13,9 +13,13 @@
 !hpc_python/
 !hpc_python/**
 
-# --- Keep your HPC SLURM scripts ---
-!hpc_slurm/
-!hpc_slurm/**
+# --- Keep your HPC LSF scripts ---
+!hpc_lsf/
+!hpc_lsf/**
+
+# --- Keep lightweight environment documentation ---
+!envs/
+!envs/README.md
 
 # --- Keep reusable thesis templates ---
 !thesis_templates/
@@ -37,3 +41,7 @@ kneaddata_project/
 **/*.tar*
 **/*.zip
 **/*.log
+
+# --- Keep only lightweight env documentation, not large env artifacts ---
+!envs/
+!envs/README.md
