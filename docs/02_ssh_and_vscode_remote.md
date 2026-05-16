@@ -79,12 +79,12 @@ First inspect existing keys so you do not overwrite something important:
 ls -la ~/.ssh
 ```
 
-Generate a new key:
+Generate a new key. Choose your own local key filename. The placeholder below is not a real key, is not a DTU-provided key, and is not specific to any one user. Never commit private keys or paste their contents into documentation, GitHub, Slack, email, or chat.
 
 ```bash
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
-ssh-keygen -t ed25519 -f ~/.ssh/dtu_hpc_ed25519 -C "<dtu-user>@dtu-hpc"
+ssh-keygen -t ed25519 -f ~/.ssh/<your-dtu-hpc-key> -C "<dtu-user>@dtu-hpc"
 ```
 
 When prompted:
@@ -96,8 +96,8 @@ When prompted:
 This creates:
 
 ```text
-~/.ssh/dtu_hpc_ed25519      # private key: keep secret
-~/.ssh/dtu_hpc_ed25519.pub  # public key: install on HPC
+~/.ssh/<your-dtu-hpc-key>      # private key: keep secret
+~/.ssh/<your-dtu-hpc-key>.pub  # public key: install on HPC
 ```
 
 Windows users can run equivalent commands in PowerShell, Git Bash, or WSL if OpenSSH is installed. The key usually lives under `C:\Users\<you>\.ssh\`.
@@ -107,13 +107,13 @@ Windows users can run equivalent commands in PowerShell, Git Bash, or WSL if Ope
 Use the method documented for your DTU account. If `ssh-copy-id` is available:
 
 ```bash
-ssh-copy-id -i ~/.ssh/dtu_hpc_ed25519.pub <dtu-user>@<login-host>
+ssh-copy-id -i ~/.ssh/<your-dtu-hpc-key>.pub <dtu-user>@<login-host>
 ```
 
 If that fails, use a manual method. On your laptop, print the public key:
 
 ```bash
-cat ~/.ssh/dtu_hpc_ed25519.pub
+cat ~/.ssh/<your-dtu-hpc-key>.pub
 ```
 
 Copy the single output line. It should begin with `ssh-ed25519`.
@@ -139,7 +139,7 @@ Never paste the private key. The private key is the file without `.pub`.
 Test key login:
 
 ```bash
-ssh -i ~/.ssh/dtu_hpc_ed25519 <dtu-user>@<login-host>
+ssh -i ~/.ssh/<your-dtu-hpc-key> <dtu-user>@<login-host>
 ```
 
 ## Recommended `~/.ssh/config`
@@ -150,7 +150,7 @@ Create or edit `~/.ssh/config` on your laptop:
 Host dtu-hpc-login
     HostName <login-host>
     User <dtu-user>
-    IdentityFile ~/.ssh/dtu_hpc_ed25519
+    IdentityFile ~/.ssh/<your-dtu-hpc-key>
     IdentitiesOnly yes
     ServerAliveInterval 60
     ServerAliveCountMax 5
@@ -158,7 +158,7 @@ Host dtu-hpc-login
 Host dtu-hpc-transfer
     HostName <transfer-host>
     User <dtu-user>
-    IdentityFile ~/.ssh/dtu_hpc_ed25519
+    IdentityFile ~/.ssh/<your-dtu-hpc-key>
     IdentitiesOnly yes
     ServerAliveInterval 60
     ServerAliveCountMax 5
@@ -219,7 +219,7 @@ In the remote VS Code window:
 2. Enter or browse to your project path, for example:
 
    ```text
-   /work3/<dtu-user>/<project>/dtuhpc_job_scripts
+   /work3/<dtu-user>/<project>/DTU_HPC_2026
    ```
 
 3. Open the folder.
@@ -301,7 +301,7 @@ ssh -vvv dtu-hpc-login
 Check files:
 
 ```bash
-ls -l ~/.ssh/dtu_hpc_ed25519 ~/.ssh/dtu_hpc_ed25519.pub ~/.ssh/config
+ls -l ~/.ssh/<your-dtu-hpc-key> ~/.ssh/<your-dtu-hpc-key>.pub ~/.ssh/config
 ```
 
 Likely causes:
@@ -317,7 +317,7 @@ Fix local permissions:
 
 ```bash
 chmod 700 ~/.ssh
-chmod 600 ~/.ssh/config ~/.ssh/dtu_hpc_ed25519
+chmod 600 ~/.ssh/config ~/.ssh/<your-dtu-hpc-key>
 ```
 
 ### Host Key Verification Failed
@@ -399,7 +399,7 @@ Likely causes:
 
 Fixes:
 
-- open only `/work3/<dtu-user>/<project>/dtuhpc_job_scripts`
+- open only `/work3/<dtu-user>/<project>/DTU_HPC_2026`
 - keep raw data and results outside the repo folder
 - use terminal commands for large trees
 - add large folders to VS Code excludes if needed

@@ -28,7 +28,7 @@ sends `job.sh` to LSF. It does not run the script directly in your terminal. LSF
 
 set -e
 
-cd /work3/<dtu-user>/<project>/dtuhpc_job_scripts
+cd /work3/<dtu-user>/<project>/DTU_HPC_2026
 
 source /work3/<dtu-user>/<project>/miniconda3/etc/profile.d/conda.sh
 conda activate <env-name>

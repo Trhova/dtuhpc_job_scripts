@@ -147,8 +147,8 @@ This is the condensed path. The detailed version is in [03 - First HPC Session](
 6. Clone this repo:
 
    ```bash
-   git clone <repo-url> dtuhpc_job_scripts
-   cd dtuhpc_job_scripts
+   git clone <repo-url> DTU_HPC_2026
+   cd DTU_HPC_2026
    ```
 
 7. Submit a tiny test job:
@@ -220,16 +220,18 @@ ssh <dtu-user>@login1.hpc.dtu.dk
 
 ### Generate a Local SSH Key
 
+Choose your own local key filename. The placeholder below is not a real key and must be replaced before running the command. Never commit private keys or paste their contents into this repo.
+
 ```bash
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
-ssh-keygen -t ed25519 -f ~/.ssh/dtu_hpc_ed25519 -C "<dtu-user>@dtu-hpc"
+ssh-keygen -t ed25519 -f ~/.ssh/<your-dtu-hpc-key> -C "<dtu-user>@dtu-hpc"
 ```
 
 ### Install Public Key If `ssh-copy-id` Works
 
 ```bash
-ssh-copy-id -i ~/.ssh/dtu_hpc_ed25519.pub <dtu-user>@login1.hpc.dtu.dk
+ssh-copy-id -i ~/.ssh/<your-dtu-hpc-key>.pub <dtu-user>@login1.hpc.dtu.dk
 ```
 
 ### SSH Config Template
@@ -238,7 +240,7 @@ ssh-copy-id -i ~/.ssh/dtu_hpc_ed25519.pub <dtu-user>@login1.hpc.dtu.dk
 Host dtu-hpc-login
     HostName login1.hpc.dtu.dk
     User <dtu-user>
-    IdentityFile ~/.ssh/dtu_hpc_ed25519
+    IdentityFile ~/.ssh/<your-dtu-hpc-key>
     IdentitiesOnly yes
     ServerAliveInterval 60
     ServerAliveCountMax 5
@@ -246,7 +248,7 @@ Host dtu-hpc-login
 Host dtu-hpc-transfer
     HostName transfer.gbar.dtu.dk
     User <dtu-user>
-    IdentityFile ~/.ssh/dtu_hpc_ed25519
+    IdentityFile ~/.ssh/<your-dtu-hpc-key>
     IdentitiesOnly yes
     ServerAliveInterval 60
     ServerAliveCountMax 5
@@ -262,8 +264,8 @@ cd /work3/<dtu-user>/<project>
 ### Clone This Repo on HPC
 
 ```bash
-git clone <repo-url> dtuhpc_job_scripts
-cd dtuhpc_job_scripts
+git clone <repo-url> DTU_HPC_2026
+cd DTU_HPC_2026
 ```
 
 ### Start a Light Interactive Session

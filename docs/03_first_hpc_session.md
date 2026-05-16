@@ -77,8 +77,8 @@ Keep raw data, databases, Conda environments, logs, and outputs under project/sc
 
 ```bash
 cd /work3/<dtu-user>/<project>
-git clone <repo-url> dtuhpc_job_scripts
-cd dtuhpc_job_scripts
+git clone <repo-url> DTU_HPC_2026
+cd DTU_HPC_2026
 ```
 
 Inspect:
@@ -96,7 +96,7 @@ From your laptop, connect with VS Code Remote-SSH to `dtu-hpc-login`.
 Open this folder in the remote VS Code window:
 
 ```text
-/work3/<dtu-user>/<project>/dtuhpc_job_scripts
+/work3/<dtu-user>/<project>/DTU_HPC_2026
 ```
 
 In the integrated terminal:

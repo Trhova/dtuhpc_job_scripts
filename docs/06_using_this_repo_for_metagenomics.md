@@ -40,7 +40,7 @@ Suggested layout:
 
 ```text
 /work3/<dtu-user>/<project>/
-  dtuhpc_job_scripts/        # this repo
+  DTU_HPC_2026/              # this repo
   raw_delivery/              # original .tar/.tar.gz or supplier folders
   input_fastq/               # cleaned/merged FASTQ inputs
   databases/                 # host, MetaPhlAn, HUMAnN databases
