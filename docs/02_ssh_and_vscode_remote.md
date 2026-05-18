@@ -12,6 +12,90 @@ Use placeholders:
 
 Check official DTU HPC documentation for current hostnames, VPN requirements, and access rules.
 
+## Connect Through DTU VPN From Off Campus
+
+If you are on campus or already on the DTU network, you can usually skip this section. If you are at home, travelling, or on another external network, connect to DTU VPN before trying SSH or VS Code Remote-SSH.
+
+DTU currently documents Cisco Secure Client / Cisco AnyConnect for VPN access. The exact DTU web pages and login flow can change, so treat this as the practical shape of the workflow and check DTU's official VPN documentation if the screens differ.
+
+### 1. Make Sure MFA Works
+
+DTU VPN uses multi-factor authentication. Before troubleshooting SSH, make sure you can sign in with your DTU account and complete MFA.
+
+Typical checks:
+
+- you know your DTU username, for example `<dtu-user>` or your DTU initials
+- you know your DTU password
+- your MFA method is set up and working
+- you can sign in to DTU self-service pages such as DTUbasen or DTU's normal Microsoft/Azure login flow
+
+### 2. Install the VPN Client
+
+On a DTU-managed laptop, Cisco Secure Client may already be installed.
+
+On a personal machine, download the client from DTU's VPN download page if your account has access:
+
+```text
+https://net.ait.dtu.dk/vpn/
+```
+
+Install the client for your operating system. The application may be called either Cisco Secure Client or Cisco AnyConnect, depending on version.
+
+Linux users can also check DTU guidance for OpenConnect. OpenConnect can work for Cisco-compatible VPNs, but use the official Cisco client first if that is what DTU support recommends for your account.
+
+### 3. Connect to DTU VPN
+
+Open Cisco Secure Client / Cisco AnyConnect.
+
+Use the DTU VPN server:
+
+```text
+vpn.dtu.dk
+```
+
+Then connect with your DTU username and password, and approve the MFA prompt.
+
+If the client has a dropdown for network/profile, choose the DTU network option documented for your account. On some machines the profile is preconfigured; on others you type `vpn.dtu.dk` manually.
+
+### 4. Test That SSH Works After VPN
+
+Keep VPN connected and test from your local terminal:
+
+```bash
+ssh <dtu-user>@<login-host>
+```
+
+Example shape:
+
+```bash
+ssh <dtu-user>@login1.hpc.dtu.dk
+```
+
+If this works on campus but times out off campus, the VPN connection is the first thing to check.
+
+### 5. Linux OpenConnect Fallback
+
+If you are on Linux and cannot use Cisco Secure Client, ask DTU support or check official DTU/Linux guidance before relying on this. A common OpenConnect shape is:
+
+```bash
+sudo openconnect --os=win --useragent=AnyConnect https://vpn.dtu.dk/
+```
+
+Some Linux setups need a `vpnc-script` path as well, for example `/etc/vpnc/vpnc-script` or `/usr/share/vpnc-scripts/vpnc-script`. Use your distribution's OpenConnect package documentation and DTU guidance.
+
+### VPN Troubleshooting Checklist
+
+| Symptom | What to check |
+| --- | --- |
+| Cisco client cannot connect | Confirm the server is `vpn.dtu.dk`, your password is current, and MFA is working. |
+| Browser/MFA prompt never appears | Try another network, restart the VPN client, or check whether pop-ups/browser handoff are blocked. |
+| SSH still times out after VPN | Disconnect/reconnect VPN, then retry `ssh <dtu-user>@<login-host>`. Check official DTU HPC hostnames. |
+| DNS cannot resolve the login host | Confirm VPN is connected and that you are using the hostname documented for your HPC account. |
+| Works on campus but not at home | VPN is probably not active, not fully authenticated, or using the wrong profile. |
+| OpenConnect fails on Linux | Prefer Cisco Secure Client if possible; otherwise check DTU's current OpenConnect flags. |
+
+Do not paste VPN passwords, MFA codes, SSH private keys, or full debug logs containing tokens into GitHub, Slack, or chat.
+
 ## What SSH Is
 
 SSH is an encrypted way to log in from your laptop to another machine. In this workflow:
@@ -59,6 +143,8 @@ ssh <dtu-user>@login1.hpc.dtu.dk
 ```
 
 If you are outside the DTU network, connect to the DTU VPN or remote-access route required for your account before trying SSH.
+
+If you have not set up VPN yet, follow [Connect Through DTU VPN From Off Campus](#connect-through-dtu-vpn-from-off-campus) first.
 
 Once logged in:
 
@@ -419,4 +505,4 @@ ping <login-host>
 ssh -vvv dtu-hpc-login
 ```
 
-If remote access requires DTU VPN for your account, connect VPN first. Check official DTU documentation for the current VPN client and setup.
+If remote access requires DTU VPN for your account, connect VPN first. Use [Connect Through DTU VPN From Off Campus](#connect-through-dtu-vpn-from-off-campus), then check official DTU documentation for current client downloads, MFA setup, and hostnames.

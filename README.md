@@ -128,7 +128,7 @@ Read these in order:
 
 This is the condensed path. The detailed version is in [03 - First HPC Session](docs/03_first_hpc_session.md).
 
-1. Connect to DTU network/VPN if required.
+1. Connect to DTU network/VPN if required. If you are off campus, see the Cisco Secure Client / AnyConnect steps in [02 - SSH and VS Code Remote-SSH](docs/02_ssh_and_vscode_remote.md#connect-through-dtu-vpn-from-off-campus).
 2. Test SSH:
 
    ```bash

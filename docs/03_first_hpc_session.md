@@ -10,7 +10,9 @@ Use placeholders:
 
 ## 1. Connect to DTU Network or VPN
 
-If you are off campus, connect to the DTU VPN or remote-access method required for your account. Check official DTU documentation for current setup.
+If you are off campus, connect to DTU VPN before trying SSH. The usual workflow is Cisco Secure Client / Cisco AnyConnect with `vpn.dtu.dk`, your DTU username/password, and MFA.
+
+Follow the concrete VPN setup in [02 - SSH and VS Code Remote-SSH](02_ssh_and_vscode_remote.md#connect-through-dtu-vpn-from-off-campus), then return here.
 
 ## 2. SSH Into a Login Node
 
